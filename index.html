@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venkat Textiles | Premium Traditional & Modern Fabrics</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Razorpay Checkout Script -->
+    <script src="https://razorpay.com"></script>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 bg-white border-b border-stone-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="#" class="text-2xl font-bold tracking-wider text-amber-800 font-serif">VENKAT TEXTILES</a>
+            <nav class="hidden md:flex space-x-8 font-medium">
+                <a href="#" class="text-amber-900 border-b-2 border-amber-800 px-1 py-2">Shop All</a>
+                <a href="#" class="text-stone-600 hover:text-amber-800 px-1 py-2 transition">Sarees</a>
+                <a href="#" class="text-stone-600 hover:text-amber-800 px-1 py-2 transition">Dress Materials</a>
+                <a href="#" class="text-stone-600 hover:text-amber-800 px-1 py-2 transition">Handlooms</a>
+            </nav>
+            <button onclick="toggleCart()" class="relative p-2 text-stone-600 hover:text-amber-800 transition cursor-pointer">
+                <svg xmlns="http://w3.org" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-amber-700 rounded-full transform translate-x-1/2 -translate-y-1/2">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Storefront Layout -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Category Sidebar Filters -->
+            <aside class="w-full lg:w-64 shrink-0">
+                <div class="bg-white p-6 rounded-xl border border-stone-200">
+                    <h2 class="text-lg font-bold text-stone-900 mb-4 font-serif">Collections</h2>
+                    <div class="space-y-3" id="categories-filter">
+                        <label class="flex items-center"><input type="radio" name="category" value="all" checked class="text-amber-700 focus:ring-amber-500 mr-3" onchange="filterProducts()"> <span class="text-stone-700">All Collections</span></label>
+                        <label class="flex items-center"><input type="radio" name="category" value="Sarees" class="text-amber-700 focus:ring-amber-500 mr-3" onchange="filterProducts()"> <span class="text-stone-700">Premium Sarees</span></label>
+                        <label class="flex items-center"><input type="radio" name="category" value="Dress Materials" class="text-amber-700 focus:ring-amber-500 mr-3" onchange="filterProducts()"> <span class="text-stone-700">Dress Materials</span></label>
+                        <label class="flex items-center"><input type="radio" name="category" value="Handloom" class="text-amber-700 focus:ring-amber-500 mr-3" onchange="filterProducts()"> <span class="text-stone-700">Handloom Fabrics</span></label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product Grid Area -->
+            <section class="flex-1">
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Products are dynamically injected here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Sliding Slide-over Cart Panel -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-stone-500/75 transition-opacity" onclick="toggleCart()"></div>
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+            <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+                <div class="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
+                    <div class="flex items-start justify-between">
+                        <h2 class="text-xl font-bold text-stone-900 font-serif">Shopping Bag</h2>
+                        <button onclick="toggleCart()" class="text-stone-400 hover:text-stone-500 cursor-pointer">✕</button>
+                    </div>
+                    <div class="mt-8" id="cart-items-container">
+                        <!-- Cart items injected here -->
+                    </div>
+                </div>
+                <!-- Cart Footer Summary -->
+                <div class="border-t border-stone-200 py-6 px-4 sm:px-6 bg-stone-50">
+                    <div class="flex justify-between text-base font-medium text-stone-900">
+                        <p>Subtotal</p>
+                        <p id="cart-total">₹0.00</p>
+                    </div>
+                    <p class="mt-0.5 text-sm text-stone-500">Shipping and taxes calculated at checkout.</p>
+                    <div class="mt-6">
+                        <button onclick="initiateRazorpayCheckout()" class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-amber-800 hover:bg-amber-900 transition cursor-pointer">
+                            Pay Securely with Razorpay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Architecture and Systems Script -->
+    <script>
+        // --- 1. SHOPIFY STOREFRONT API SYSTEM (MOCK) ---
+        // Replace with your actual Shopify Credentials when ready
+        const SHOPIFY_CONFIG = {
+            domain: '://myshopify.com',
+            storefrontAccessToken: 'your-access-token-here'
+        };
+
+        // Sample initial datasets mimicking active catalog returns from Shopify
+        const sampleProducts = [
+            { id: "prod_1", title: "Kanchipuram Silk Saree", category: "Sarees", price: 8500, image: "https://unsplash.com" },
+            { id: "prod_2", title: "Unstitched Cotton Dress Material", category: "Dress Materials", price: 2400, image: "https://unsplash.com" },
+            { id: "prod_3", title: "Pure Ikat Handloom Yardage", category: "Handloom", price: 650, image: "https://unsplash.com" }
+        ];
+
+        let cart = [];
+
+        // --- 2. PRESENTATION AND RENDERING CONTROLLERS ---
+        function renderProducts(productsToRender) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = productsToRender.map(product => `
+                <div class="bg-white rounded-xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-md transition">
+                    <img src="${product.image}" alt="${product.title}" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <span class="text-xs font-semibold tracking-wider text-amber-800 uppercase">${product.category}</span>
+                        <h3 class="text-lg font-bold text-stone-900 mt-1">${product.title}</h3>
+                        <div class="mt-4 flex items-center justify-between">
+                            <span class="text-xl font-extrabold text-stone-950">₹${product.price.toLocaleString('en-IN')}</span>
+                            <button onclick="addToCart('${product.id}')" class="px-4 py-2 bg-stone-900 hover:bg-amber-800 text-white text-sm font-medium rounded-md transition cursor-pointer">
+                                Add to Bag
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterProducts() {
+            const activeCategory = document.querySelector('input[name="category"]:checked').value;
+            if (activeCategory === 'all') {
+                renderProducts(sampleProducts);
+            } else {
+                const filtered = sampleProducts.filter(p => p.category === activeCategory);
+                renderProducts(filtered);
+            }
+        }
+
+        // --- 3. E-COMMERCE CORE STATE ENGINE ---
+        function toggleCart() {
+            document.getElementById('cart-drawer').classList.toggle('hidden');
+        }
+
+        function addToCart(productId) {
+            const product = sampleProducts.find(p => p.id === productId);
+            const explicitCartItem = cart.find(item => item.id === productId);
+
+            if (explicitCartItem) {
+                explicitCartItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const countEl = document.getElementById('cart-count');
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+
+            const totalItems = cart.reduce((acc, curr) => acc + curr.quantity, 0);
+            countEl.innerText = totalItems;
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-stone-500 text-center py-8">Your bag is empty.</p>`;
+                totalEl.innerText = "₹0.00";
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
